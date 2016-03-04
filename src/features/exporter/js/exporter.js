@@ -1004,7 +1004,19 @@
           var blob;
 
           doc.getBuffer( function (buffer) {
-            blob = new Blob([buffer]);
+            try {
+              blob = new Blob([buffer], {
+                type: 'application/pdf'
+              });
+            } catch (e) {
+              // Old browser which can't handle it without making it an byte array (ie10)
+              if (e.name === "InvalidStateError") {
+                var byteArray = new Unit8Array(buffer);
+                blob = new Blob([byteArray.buffer], {
+                  type: 'application/pdf'
+                });
+              }
+            }
 
             if (ieVersion && ieVersion < 10) {
               var frame = D.createElement('iframe');
